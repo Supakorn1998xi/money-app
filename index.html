@@ -43,10 +43,6 @@
 </div>
 
 
-<!-- transactions -->
-
-<div class="transaction-list" id="transactionList"></div>
-
 
 <!-- form -->
 
@@ -57,7 +53,12 @@
 <option value="income">รายรับ</option>
 </select>
 
-<input id="category" placeholder="หมวดหมู่">
+<select id="category" placeholder="หมวดหมู่">
+<option value="food">กิน</option>
+<option value="travel">เที่ยว</option>
+<option value="gas">น้ำมัน</option>
+</select>
+
 
 <input id="amount" type="number" placeholder="จำนวนเงิน">
 
@@ -87,6 +88,10 @@
 </div>
 
 
+<!-- transactions -->
+
+<div class="transaction-list" id="transactionList"></div>
+  
 <script src="app.js"></script>
 
 </body>
