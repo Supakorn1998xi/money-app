@@ -1,90 +1,31 @@
-body{
+.formBox{
 
-font-family:sans-serif;
-background:#eef2f7;
-margin:0;
-padding:20px;
-
-}
-
-.container{
-
-max-width:400px;
-margin:auto;
-
-}
-
-h2{
-
-text-align:center;
-
-}
-
-.totalBox{
-
-font-size:40px;
-font-weight:bold;
-text-align:center;
 background:white;
 padding:15px;
 border-radius:12px;
 margin-bottom:20px;
-
-}
-
-.card{
-
-background:white;
-padding:20px;
-border-radius:12px;
-margin-bottom:20px;
-
-}
-
-.goal{
-
-background:white;
-padding:10px;
-border-radius:10px;
-margin-bottom:10px;
-
-}
-
-.progress{
-
-height:10px;
-background:#ddd;
-border-radius:10px;
-overflow:hidden;
-
-}
-
-.progress-bar{
-
-height:100%;
-background:#4CAF50;
-
-}
-
-.transaction{
 
 display:flex;
-justify-content:space-between;
-background:white;
-padding:10px;
-border-radius:10px;
-margin-bottom:8px;
+flex-direction:column;
+gap:10px;
 
 }
 
-.addBtn{
+.formBox select,
+.formBox input{
 
-width:100%;
-padding:15px;
-border:none;
-border-radius:25px;
+padding:10px;
+border-radius:8px;
+border:1px solid #ddd;
+
+}
+
+.formBox button{
+
 background:#3a7bd5;
 color:white;
-font-size:18px;
+border:none;
+padding:10px;
+border-radius:8px;
 
 }
