@@ -1,4 +1,4 @@
-const API_URL = "https://script.google.com/macros/s/AKfycbzqFjacJCLEZHKUusD0fDEZZP2goURhbhidHQTRxKn_olHgKaG7OCR0LRMJhQTmlV4kJQ/exec"
+const API_URL="https://script.google.com/macros/s/AKfycbwqqhi9c47fwoqlZ6sABBMBzPntzPV1ANP6RfMClCdKIG3ixx04mXNBfo6ST7ufImCtTQ/exec"
 
 let chart
 
@@ -10,35 +10,44 @@ fetch(API_URL)
 
 renderTotal(data)
 renderChart(data)
-renderGoals(data.goals)
-renderTransactions(data.transactions)
+renderTransactions(data)
 
 })
 
 }
+function renderTotal(list){
 
-function renderTotal(data){
+let total = 0
 
-let total = data.transactions.reduce((sum,t)=>{
+list.forEach(t=>{
 
-if(t.type=="income") return sum + Number(t.amount)
-else return sum - Number(t.amount)
+if(t.type=="income"){
 
-},0)
+total += Number(t.amount)
 
-document.getElementById("totalMoney").innerText = total.toLocaleString()
+}else{
+
+total -= Number(t.amount)
 
 }
 
-function renderChart(data){
+})
+
+document.getElementById("totalMoney").innerText =
+total.toLocaleString()
+
+}
+
+function renderChart(list){
 
 let categories={}
 
-data.transactions.forEach(t=>{
+list.forEach(t=>{
 
 if(t.type=="expense"){
 
-if(!categories[t.category]) categories[t.category]=0
+if(!categories[t.category])
+categories[t.category]=0
 
 categories[t.category]+=Number(t.amount)
 
@@ -51,53 +60,19 @@ let values=Object.values(categories)
 
 const ctx=document.getElementById("pieChart")
 
+if(chart) chart.destroy()
+
 chart=new Chart(ctx,{
-
 type:'doughnut',
-
 data:{
 labels:labels,
 datasets:[{
 data:values
 }]
 }
-
 })
 
 }
-
-function renderGoals(goals){
-
-let box=document.getElementById("goalList")
-
-box.innerHTML=""
-
-goals.forEach(g=>{
-
-let percent=Math.floor(g.saved/g.target*100)
-
-box.innerHTML+=`
-
-<div class="goal">
-
-<b>${g.name}</b>
-
-<p>${g.saved}/${g.target}</p>
-
-<div class="progress">
-
-<div class="progress-bar" style="width:${percent}%"></div>
-
-</div>
-
-</div>
-
-`
-
-})
-
-}
-
 function renderTransactions(list){
 
 let box=document.getElementById("transactionList")
@@ -116,7 +91,7 @@ box.innerHTML+=`
 <div>
 
 <b>${t.category}</b><br>
-${t.date}
+${new Date(t.date).toLocaleDateString()}
 
 </div>
 
@@ -133,37 +108,4 @@ ${sign}${t.amount}
 })
 
 }
-function saveTransaction(){
-
-let type = document.getElementById("type").value
-let category = document.getElementById("category").value
-let amount = document.getElementById("amount").value
-
-fetch(API_URL,{
-
-method:"POST",
-
-body:JSON.stringify({
-
-action:"addTransaction",
-type:type,
-category:category,
-amount:amount
-
-})
-
-})
-.then(res=>res.text())
-.then(()=>{
-
-document.getElementById("amount").value=""
-
-loadData()
-
-})
-
-}
-
-}
-
 loadData()
