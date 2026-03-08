@@ -1,134 +1,67 @@
+```html
 <!DOCTYPE html>
 <html>
 <head>
-
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta charset="UTF-8">
+<title>Money Tracker</title>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <style>
-
 body{
-font-family:sans-serif;
-background:#f5f7fb;
-padding:20px;
+font-family:Arial;
+background:#f5f5f5;
+margin:20px;
 }
 
-h1{
-margin-bottom:20px;
+h2{
+margin-top:40px;
+}
+
+.container{
+max-width:900px;
+margin:auto;
 }
 
 .card{
 background:white;
 padding:20px;
-border-radius:15px;
-margin-bottom:20px;
-box-shadow:0 5px 15px rgba(0,0,0,0.05);
-}
-
-.balance{
-font-size:36px;
-font-weight:bold;
-color:#2c7be5;
-}
-
-input,select{
-width:100%;
-padding:10px;
-margin-top:10px;
-border-radius:8px;
-border:1px solid #ddd;
-}
-
-button{
-margin-top:10px;
-padding:12px;
-border:none;
 border-radius:10px;
-background:#2c7be5;
-color:white;
-width:100%;
-}
-
-.charts{
-display:flex;
-gap:20px;
-flex-wrap:wrap;
+margin-bottom:30px;
+box-shadow:0 2px 8px rgba(0,0,0,0.1);
 }
 
 canvas{
-max-width:350px;
+max-height:350px;
 }
-
-#history{
-display:none;
-}
-
 </style>
-
 </head>
 
 <body>
 
-<h1>💰 Money Tracker</h1>
+<div class="container">
+
+<h1>Money Dashboard</h1>
 
 <div class="card">
-เงินคงเหลือ
-<div class="balance" id="balance">0</div>
-</div>
-
-<div class="card">
-
-<h2>เพิ่มรายการ</h2>
-
-<select id="type" onchange="updateCategory()">
-<option value="income">รายรับ</option>
-<option value="expense">รายจ่าย</option>
-</select>
-
-<select id="category"></select>
-
-<input id="amount" placeholder="จำนวนเงิน">
-
-<button onclick="save()">บันทึก</button>
-
-</div>
-
-<div class="card">
-
-<h2>สัดส่วนการเงิน</h2>
-
-<div class="charts">
-
-<div>
-<h4>ค่าใช้จ่าย</h4>
+<h2>Income vs Expense</h2>
 <canvas id="cashChart"></canvas>
 </div>
 
-<div>
-<h4>เงินเก็บ</h4>
-<canvas id="savingChart"></canvas>
-</div>
-
-</div>
-
+<div class="card">
+<h2>Savings Allocation</h2>
+<canvas id="savingsChart"></canvas>
 </div>
 
 <div class="card">
-<h2>เป้าหมาย</h2>
-<canvas id="goalChart"></canvas>
+<h2>Goals Progress</h2>
+<canvas id="goalsChart"></canvas>
 </div>
-
-<div class="card">
-
-<button onclick="toggleHistory()">ดูประวัติ</button>
-
-<div id="history"></div>
 
 </div>
 
 <script>
 
-const API="https://script.google.com/macros/s/AKfycbzbpK_vp-WGzS-huLYhYCP_25mzcTZT5nR8uqzg8wnAzHQYR72H8ofl6BVoL1Om9UiXug/exec"
+const API="https://script.google.com/macros/s/AKfycbzkl3ZDKFPqZNCvZHH65AgifHNBXAvgkgIWwQvjM1gcrTqX73aNgc-gdGcfgFj6TfOgSA/execL";
 
 const allocation={
 บ้าน:0.25,
@@ -183,7 +116,9 @@ new Chart(document.getElementById("savingsChart"),{
 type:'pie',
 data:{
 labels:Object.keys(data),
-datasets:[{data:Object.values(data)}]
+datasets:[{
+data:Object.values(data)
+}]
 }
 });
 
@@ -224,10 +159,18 @@ new Chart(document.getElementById("cashChart"),{
 type:'doughnut',
 data:{
 labels:['Income','Expense'],
-datasets:[{data:[income,expense]}]
+datasets:[{
+data:[income,expense]
+}]
 }
 });
 
 }
 
 loadData();
+
+</script>
+
+</body>
+</html>
+```
