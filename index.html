@@ -1,9 +1,11 @@
 <!DOCTYPE html>
-<html>
-
+<html lang="th">
 <head>
+
 <meta charset="UTF-8">
-<title>บันทึกรายรับรายจ่าย</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Money App</title>
 
 <link rel="stylesheet" href="style.css">
 
@@ -13,35 +15,37 @@
 
 <body>
 
-<h1>เงินกองกลางของเรา</h1>
+<div class="container">
 
-<h2 id="balance">฿0</h2>
+<h2>เงินกองกลางของเรา</h2>
 
-<canvas id="chart"></canvas>
+<div class="totalBox">
+฿ <span id="totalMoney">0</span>
+</div>
 
-<div class="form">
+<div class="card">
 
-<select id="type">
-<option value="income">รายรับ</option>
-<option value="expense">รายจ่าย</option>
-</select>
+<canvas id="pieChart"></canvas>
 
-<input id="category" placeholder="หมวด">
-
-<input id="amount" type="number" placeholder="จำนวนเงิน">
-
-<input id="note" placeholder="รายละเอียด">
-
-<button onclick="addItem()">เพิ่มรายการ</button>
+<div id="categoryList"></div>
 
 </div>
 
-<h2>รายการทั้งหมด</h2>
+<h3>เป้าหมายร่วมกัน</h3>
 
-<div id="list"></div>
+<div id="goalList"></div>
+
+<h3>การใช้เงินกองกลาง</h3>
+
+<div id="transactionList"></div>
+
+<button class="addBtn" onclick="addTransaction()">
++ เพิ่มรายการ
+</button>
+
+</div>
 
 <script src="app.js"></script>
 
 </body>
-
 </html>
