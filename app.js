@@ -1,4 +1,4 @@
-const API_URL = "https://script.google.com/macros/s/AKfycbyvXkm3k0DWAmgtRJr0hyOTMTqa7Ajm0ERttHe2c8RrwIIlmp6dJfcN0ORYCjxjtpyNDg/exec"
+const API_URL = "https://script.google.com/macros/s/AKfycbwUI-sPYGV_7QQEkzv70klIzJbj6IFnETw0E134xrqCM8BILroVNDh6_wP-EjaLVCjVkw/exec"
 
 const form = document.getElementById("form")
 
