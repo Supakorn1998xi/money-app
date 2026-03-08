@@ -1,178 +1,105 @@
-const API_URL = "https://script.google.com/macros/s/AKfycbwUI-sPYGV_7QQEkzv70klIzJbj6IFnETw0E134xrqCM8BILroVNDh6_wP-EjaLVCjVkw/exec"
+const API_URL = "https://script.google.com/macros/s/AKfycbwUI-sPYGV_7QQEkzv70klIzJbj6IFnETw0E134xrqCM8BILroVNDh6_wP-EjaLVCjVkw/exec";
 
-const form = document.getElementById("form")
-
-let expenseChart
-let goalChart
-
-form.addEventListener("submit",function(e){
-
-e.preventDefault()
-
-const category = document.getElementById("category").value
-const amount = document.getElementById("amount").value
-const type = document.getElementById("type").value
-
-fetch(API_URL,{
-method:"POST",
-body:JSON.stringify({category,amount,type})
-})
-.then(res=>res.text())
-.then(()=>{
-
-showPopup()
-
-loadData()
-
-})
-
-form.reset()
-
-})
-
+// โหลดข้อมูลทั้งหมด
 function loadData(){
 
 fetch(API_URL)
-.then(res=>res.json())
-.then(data=>{
+.then(res => res.json())
+.then(data => {
 
-renderTotal(data)
-renderChart(data)
-renderTransactions(data)
+console.log("API DATA:", data)
 
-})
+const transactions = data.transactions
+const goals = data.goals
 
-renderGoalChart()
-
-}
-
-function renderTotal(list){
-
-let total = 0
-
-list.forEach(t=>{
-
-if(t.type==="income"){
-total+=Number(t.amount)
-}
-
-if(t.type==="expense"){
-total-=Number(t.amount)
-}
+renderSummary(transactions)
+renderTransactions(transactions)
+renderGoals(goals)
 
 })
-
-document.getElementById("totalMoney").innerText=
-"฿"+total.toLocaleString()
+.catch(err => {
+console.error("Fetch error:", err)
+})
 
 }
 
-function renderChart(list){
+// สรุปรายรับรายจ่าย
+function renderSummary(data){
 
-const expense={}
+let income = 0
+let expense = 0
 
-list.forEach(t=>{
+data.forEach(t => {
 
-if(t.type==="expense"){
-
-if(!expense[t.category]){
-expense[t.category]=0
+if(t.type === "income"){
+income += Number(t.amount)
 }
 
-expense[t.category]+=Number(t.amount)
-
+if(t.type === "expense"){
+expense += Number(t.amount)
 }
 
 })
 
-const labels=Object.keys(expense)
-const data=Object.values(expense)
-
-if(expenseChart){
-expenseChart.destroy()
-}
-
-expenseChart=new Chart(
-
-document.getElementById("expenseChart"),
-
-{
-type:"pie",
-data:{
-labels:labels,
-datasets:[{data:data}]
-}
-}
-
-)
+document.getElementById("income").innerText = income
+document.getElementById("expense").innerText = expense
+document.getElementById("balance").innerText = income - expense
 
 }
 
-function renderGoalChart(){
+// แสดงรายการธุรกรรม
+function renderTransactions(data){
 
-fetch(API_URL+"?sheet=goal")
-.then(res=>res.json())
-.then(data=>{
+const box = document.getElementById("transactions")
 
-const labels=data.map(r=>r.category)
-const values=data.map(r=>Number(r.amount))
+box.innerHTML = ""
 
-if(goalChart){
-goalChart.destroy()
-}
+data.slice().reverse().forEach(t => {
 
-goalChart=new Chart(
+box.innerHTML += `
+<div class="transaction">
+<div>
+${t.date} - ${t.category}
+</div>
 
-document.getElementById("goalChart"),
-
-{
-type:"bar",
-data:{
-labels:labels,
-datasets:[{
-label:"Goal",
-data:values
-}]
-}
-}
-
-)
+<div class="${t.type}">
+฿${t.amount}
+</div>
+</div>
+`
 
 })
 
 }
 
-function renderTransactions(list){
+// แสดง Goal Progress
+function renderGoals(goals){
 
-const ul=document.getElementById("transactionList")
+const box = document.getElementById("goals")
 
-ul.innerHTML=""
+box.innerHTML = ""
 
-const latest=list.slice(-10).reverse()
+goals.forEach(g => {
 
-latest.forEach(t=>{
+const percent = (g.saved / g.target) * 100
 
-const li=document.createElement("li")
+box.innerHTML += `
+<div class="goal-item">
 
-li.innerText=
-t.category+" - ฿"+Number(t.amount).toLocaleString()
+<h3>${g.name}</h3>
 
-ul.appendChild(li)
+<p>${g.saved} / ${g.target}</p>
+
+<div class="progress">
+<div class="bar" style="width:${percent}%"></div>
+</div>
+
+</div>
+`
 
 })
 
 }
 
-function showPopup(){
-
-document.getElementById("popup").style.display="flex"
-
-}
-
-function closePopup(){
-
-document.getElementById("popup").style.display="none"
-
-}
-
+// เริ่มโหลดข้อมูล
 loadData()
