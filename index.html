@@ -1,8 +1,11 @@
 <!DOCTYPE html>
 <html lang="th">
+
 <head>
 
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
 <title>Money Tracker</title>
 
 <link rel="stylesheet" href="style.css">
@@ -15,68 +18,76 @@
 
 <div class="container">
 
-<h1>💰 Money Tracker</h1>
+<div class="header">
+💰 Money Tracker
+</div>
 
-<div class="balance-card">
 
-<h2>เงินคงเหลือ</h2>
+<!-- total -->
 
-<h1 id="totalMoney">฿0</h1>
+<div class="total-card">
+
+<div>ยอดเงินคงเหลือ</div>
+
+<h2>฿<span id="totalMoney">0</span></h2>
 
 </div>
 
-<form id="form">
 
-<input type="text" id="category" placeholder="หมวดหมู่" required>
+<!-- chart -->
 
-<input type="number" id="amount" placeholder="จำนวนเงิน" required>
+<div class="chart-box">
+
+<canvas id="pieChart"></canvas>
+
+</div>
+  
+<!-- goal chart -->
+<div class="chart-box">
+
+<h3>เป้าหมายการเก็บเงิน</h3>
+
+<canvas id="goalChart"></canvas>
+
+</div>
+  
+
+<!-- form -->
+
+<div class="form-box">
 
 <select id="type">
-<option value="income">รายรับ</option>
 <option value="expense">รายจ่าย</option>
+<option value="income">รายรับ</option>
 </select>
 
-<button type="submit">บันทึก</button>
+<select id="category" placeholder="หมวดหมู่">
+<option value="food">กิน</option>
+<option value="travel">เที่ยว</option>
+<option value="gas">น้ำมัน</option>
+</select>
 
-</form>
 
-<div class="charts">
+<input id="amount" type="number" placeholder="จำนวนเงิน">
 
-<div class="chart-box">
-<h3>สัดส่วนรายจ่าย</h3>
-<canvas id="expenseChart"></canvas>
-</div>
-
-<div class="chart-box">
-<h3>Goal</h3>
-<canvas id="goalChart"></canvas>
-</div>
-
-</div>
-
-<div class="history">
-
-<h3>ประวัติรายการล่าสุด</h3>
-
-<ul id="transactionList"></ul>
-
-<a
-class="sheet-btn"
-href="https://docs.google.com/spreadsheets/d/1IOMppJFPrQN9XzY8-ZPYVBHlJyNIEayNLoBkjAHZtaE/edit?usp=sharing"
-target="_blank"
->
-ดูทั้งหมดใน Google Sheet
-</a>
+<button onclick="saveTransaction()">
+บันทึกรายการ
+</button>
 
 </div>
 
 </div>
+
+
+<!-- popup -->
 
 <div id="popup" class="popup">
 
-<div class="popup-content">
+<div class="popup-box">
 
-<p>✅ บันทึกข้อมูลเรียบร้อย</p>
+<h3>บันทึกเรียบร้อย</h3>
+
+<p>รายการถูกบันทึกแล้ว</p>
 
 <button onclick="closePopup()">ปิด</button>
 
@@ -84,6 +95,19 @@ target="_blank"
 
 </div>
 
+
+<!-- transactions -->
+
+<div class="transaction-list" id="transactionList"></div>
+
+<div class="view-more">
+
+<a href="https://docs.google.com/spreadsheets/d/1IOMppJFPrQN9XzY8-ZPYVBHlJyNIEayNLoBkjAHZtaE/edit?usp=sharing" target="_blank">
+ดูรายการทั้งหมด
+</a>
+
+</div>
+  
 <script src="app.js"></script>
 
 </body>
