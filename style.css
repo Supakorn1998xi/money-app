@@ -1,31 +1,177 @@
-.formBox{
+body{
+font-family: 'Segoe UI', Tahoma, sans-serif;
+background:#f4f6fb;
+margin:0;
+padding:0;
+color:#333;
+}
 
+
+
+/* container */
+
+.container{
+max-width:420px;
+margin:auto;
+padding:20px;
+}
+
+
+
+/* header */
+
+.header{
+font-size:22px;
+font-weight:700;
+margin-bottom:15px;
+}
+
+
+
+/* total card */
+
+.total-card{
 background:white;
-padding:15px;
-border-radius:12px;
+padding:20px;
+border-radius:18px;
+box-shadow:0 6px 20px rgba(0,0,0,0.06);
 margin-bottom:20px;
+}
 
+.total-card h2{
+margin:0;
+font-size:28px;
+}
+
+
+
+/* chart */
+
+.chart-box{
+background:white;
+padding:20px;
+border-radius:18px;
+box-shadow:0 6px 20px rgba(0,0,0,0.06);
+margin-bottom:20px;
+}
+
+
+
+/* transaction list */
+
+.transaction-list{
+background:white;
+border-radius:18px;
+box-shadow:0 6px 20px rgba(0,0,0,0.06);
+overflow:hidden;
+margin-bottom:20px;
+}
+
+.transaction{
 display:flex;
-flex-direction:column;
-gap:10px;
-
+justify-content:space-between;
+padding:14px 16px;
+border-bottom:1px solid #eee;
+font-size:14px;
 }
 
-.formBox select,
-.formBox input{
+.transaction:last-child{
+border-bottom:none;
+}
 
-padding:10px;
-border-radius:8px;
+.income{
+color:#1db954;
+font-weight:600;
+}
+
+.expense{
+color:#e53935;
+font-weight:600;
+}
+
+
+
+/* form */
+
+.form-box{
+background:white;
+padding:18px;
+border-radius:18px;
+box-shadow:0 6px 20px rgba(0,0,0,0.06);
+}
+
+.form-box select,
+.form-box input{
+width:100%;
+padding:12px;
+margin-bottom:10px;
+border-radius:10px;
 border:1px solid #ddd;
-
+font-size:14px;
 }
 
-.formBox button{
 
-background:#3a7bd5;
-color:white;
+
+/* button */
+
+button{
+width:100%;
+background:#5b7cfa;
 border:none;
-padding:10px;
-border-radius:8px;
+color:white;
+padding:12px;
+border-radius:12px;
+font-size:15px;
+font-weight:600;
+cursor:pointer;
+transition:0.2s;
+}
+
+button:hover{
+background:#4a67e8;
+}
+
+
+
+/* popup */
+
+.popup{
+position:fixed;
+top:0;
+left:0;
+width:100%;
+height:100%;
+background:rgba(0,0,0,0.4);
+display:none;
+align-items:center;
+justify-content:center;
+}
+
+.popup-box{
+background:white;
+padding:25px;
+border-radius:16px;
+text-align:center;
+width:260px;
+box-shadow:0 10px 25px rgba(0,0,0,0.2);
+}
+
+.popup-box button{
+margin-top:10px;
+}
+
+
+
+/* mobile */
+
+@media (max-width:480px){
+
+.container{
+padding:16px;
+}
+
+.total-card h2{
+font-size:24px;
+}
 
 }
