@@ -3,18 +3,19 @@
 <head>
 
 <meta name="viewport" content="width=device-width, initial-scale=1">
+
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <style>
 
 body{
 font-family:sans-serif;
-background:#f2f2f2;
+background:#f5f7fb;
 padding:20px;
 }
 
-h1,h2{
-margin:5px 0;
+h1{
+margin-bottom:20px;
 }
 
 .card{
@@ -22,7 +23,7 @@ background:white;
 padding:20px;
 border-radius:15px;
 margin-bottom:20px;
-box-shadow:0 3px 10px rgba(0,0,0,0.05);
+box-shadow:0 5px 15px rgba(0,0,0,0.05);
 }
 
 .balance{
@@ -32,43 +33,45 @@ color:#2c7be5;
 }
 
 input,select{
+
 width:100%;
 padding:10px;
 margin-top:10px;
 border-radius:8px;
 border:1px solid #ddd;
+
 }
 
 button{
+
 margin-top:10px;
-padding:10px;
+padding:12px;
 border:none;
-border-radius:8px;
+border-radius:10px;
 background:#2c7be5;
 color:white;
 width:100%;
+
+}
+
+.charts{
+
+display:flex;
+gap:20px;
+flex-wrap:wrap;
+
+}
+
+canvas{
+
+max-width:350px;
+
 }
 
 #history{
-display:none;
-}
 
-.popup{
-
-position:fixed;
-top:50%;
-left:50%;
-transform:translate(-50%,-50%);
-background:white;
-padding:30px;
-border-radius:12px;
-box-shadow:0 0 15px rgba(0,0,0,0.2);
 display:none;
 
-}
-
-.popup button{
-background:#555;
 }
 
 </style>
@@ -91,19 +94,14 @@ background:#555;
 
 <h2>เพิ่มรายการ</h2>
 
-<select id="type">
+<select id="type" onchange="updateCategory()">
+
 <option value="income">รายรับ</option>
 <option value="expense">รายจ่าย</option>
-</select>
-
-<select id="category">
-
-<option value="food">กิน</option>
-<option value="travel">เที่ยว</option>
-<option value="fuel">น้ำมัน</option>
-<option value="future">เก็บอนาคต</option>
 
 </select>
+
+<select id="category"></select>
 
 <input id="amount" placeholder="จำนวนเงิน">
 
@@ -113,9 +111,25 @@ background:#555;
 
 <div class="card">
 
-<h2>สัดส่วนค่าใช้จ่าย</h2>
+<h2>สัดส่วนการเงิน</h2>
 
-<canvas id="pie"></canvas>
+<div class="charts">
+
+<div>
+
+<h4>ค่าใช้จ่าย</h4>
+<canvas id="expenseChart"></canvas>
+
+</div>
+
+<div>
+
+<h4>เงินเก็บ</h4>
+<canvas id="savingChart"></canvas>
+
+</div>
+
+</div>
 
 </div>
 
@@ -123,7 +137,7 @@ background:#555;
 
 <h2>เป้าหมาย</h2>
 
-<canvas id="bar"></canvas>
+<canvas id="goalChart"></canvas>
 
 </div>
 
@@ -135,20 +149,46 @@ background:#555;
 
 </div>
 
-<div class="popup" id="popup">
-
-<h2>บันทึกแล้ว ✅</h2>
-
-<button onclick="closePopup()">ปิด</button>
-
-</div>
-
 <script>
 
-const API="https://script.google.com/macros/s/AKfycbxietsrlh7CeLH-4sOmCMfKytzC8CQLj8_RxB3WRPFObrKAVuYElQuZiXsxIEpSyLkGCw/exec"
+const API="https://script.google.com/macros/s/AKfycbzbpK_vp-WGzS-huLYhYCP_25mzcTZT5nR8uqzg8wnAzHQYR72H8ofl6BVoL1Om9UiXug/exec"
 
-let pieChart
-let barChart
+let expenseChart
+let savingChart
+let goalChart
+
+function updateCategory(){
+
+const type=document.getElementById("type").value
+const category=document.getElementById("category")
+
+if(type==="expense"){
+
+category.innerHTML=`
+
+<option value="food">กิน</option>
+<option value="travel">เที่ยว</option>
+<option value="fuel">น้ำมัน</option>
+
+`
+
+}
+
+if(type==="income"){
+
+category.innerHTML=`
+
+<option value="house">บ้าน</option>
+<option value="car">รถ</option>
+<option value="trip">เที่ยว</option>
+
+`
+
+}
+
+}
+
+updateCategory()
 
 async function load(){
 
@@ -162,29 +202,43 @@ let expense=0
 let food=0
 let travel=0
 let fuel=0
-let future=0
+
+let house=0
+let car=0
+let trip=0
 
 let historyHTML=""
 
 data.forEach(t=>{
 
-if(t.type=="income") income+=Number(t.amount)
+const amount=Number(t.amount)
 
-if(t.type=="expense"){
+if(t.type==="income"){
 
-expense+=Number(t.amount)
+income+=amount
 
-if(t.category=="food") food+=Number(t.amount)
-if(t.category=="travel") travel+=Number(t.amount)
-if(t.category=="fuel") fuel+=Number(t.amount)
-if(t.category=="future") future+=Number(t.amount)
+if(t.category==="house") house+=amount
+if(t.category==="car") car+=amount
+if(t.category==="trip") trip+=amount
+
+}
+
+if(t.type==="expense"){
+
+expense+=amount
+
+if(t.category==="food") food+=amount
+if(t.category==="travel") travel+=amount
+if(t.category==="fuel") fuel+=amount
 
 }
 
 historyHTML+=`
+
 <div>
-${t.date} - ${t.category} - ${t.amount}
+${t.date} | ${t.category} | ${t.amount}
 </div>
+
 `
 
 })
@@ -193,29 +247,36 @@ document.getElementById("balance").innerText=income-expense
 
 document.getElementById("history").innerHTML=historyHTML
 
-drawPie(food,travel,fuel,future)
+drawExpenseChart(food,travel,fuel)
 
-drawBar()
+drawSavingChart(house,car,trip)
+
+loadGoals()
 
 }
 
-function drawPie(food,travel,fuel,future){
+function drawExpenseChart(food,travel,fuel){
 
-if(pieChart) pieChart.destroy()
+if(expenseChart) expenseChart.destroy()
 
-pieChart=new Chart(
+expenseChart=new Chart(
 
-document.getElementById("pie"),
+document.getElementById("expenseChart"),
 
 {
+
 type:"pie",
 
 data:{
-labels:["กิน","เที่ยว","น้ำมัน","เก็บอนาคต"],
+
+labels:["กิน","เที่ยว","น้ำมัน"],
 
 datasets:[{
-data:[food,travel,fuel,future]
+
+data:[food,travel,fuel]
+
 }]
+
 }
 
 }
@@ -224,28 +285,87 @@ data:[food,travel,fuel,future]
 
 }
 
-function drawBar(){
+function drawSavingChart(house,car,trip){
 
-if(barChart) barChart.destroy()
+if(savingChart) savingChart.destroy()
 
-barChart=new Chart(
+savingChart=new Chart(
 
-document.getElementById("bar"),
+document.getElementById("savingChart"),
 
 {
+
+type:"pie",
+
+data:{
+
+labels:["บ้าน","รถ","เที่ยว"],
+
+datasets:[{
+
+data:[house,car,trip]
+
+}]
+
+}
+
+}
+
+)
+
+}
+
+async function loadGoals(){
+
+const res=await fetch(API+"?sheet=goals")
+
+const data=await res.json()
+
+const labels=data.map(g=>g.name)
+const saved=data.map(g=>Number(g.saved))
+const target=data.map(g=>Number(g.target))
+
+if(goalChart) goalChart.destroy()
+
+goalChart=new Chart(
+
+document.getElementById("goalChart"),
+
+{
+
 type:"bar",
 
 data:{
 
-labels:["บ้าน","รถ","ลูก"],
+labels:labels,
 
-datasets:[{
+datasets:[
+
+{
+
+label:"เป้าหมาย",
+
+data:target,
+backgroundColor:"#e0e0e0"
+
+},
+
+{
 
 label:"เงินเก็บ",
 
-data:[300000,100000,50000]
+data:saved,
+backgroundColor:"#2c7be5"
 
-}]
+}
+
+]
+
+},
+
+options:{
+
+indexAxis:'y'
 
 }
 
@@ -276,15 +396,9 @@ date:new Date().toLocaleDateString()
 
 })
 
-document.getElementById("popup").style.display="block"
+alert("บันทึกแล้ว")
 
-load()
-
-}
-
-function closePopup(){
-
-document.getElementById("popup").style.display="none"
+location.reload()
 
 }
 
@@ -292,7 +406,7 @@ function toggleHistory(){
 
 const el=document.getElementById("history")
 
-if(el.style.display=="none"){
+if(el.style.display==="none"){
 
 el.style.display="block"
 
