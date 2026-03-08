@@ -163,7 +163,7 @@ background:#555;
 
 <script>
 
-const API="https://script.google.com/macros/s/AKfycbx4JNZtsdbTYurHbJQot7nNZQU2meYMJ1vF8XsStagbrC6fwZgG6Y5KDTAWpaj4CBP67A/exec"
+const API="https://script.google.com/macros/s/AKfycbzQfJcKY7ibv6Vl1szhQIoiNPGsL0LoH1EeIT9FIdqjgywLuY6cNK1BvYnZUjtwwqgqhg/exec"
 
 let expenseChart
 let savingChart
@@ -203,6 +203,15 @@ category.innerHTML=`
 
 updateCategory()
 
+async function loadGoals(){
+
+const res = await fetch(API + "?sheet=goals")
+const data = await res.json()
+
+drawGoalChart(data)
+
+}
+  
 async function load(){
 
 const res=await fetch(API)
@@ -383,6 +392,33 @@ position:'bottom'
 
 }
 
+async function save(){
+
+const type=document.getElementById("type").value
+const category=document.getElementById("category").value
+const amount=document.getElementById("amount").value
+
+await fetch(API,{
+
+method:"POST",
+
+body:JSON.stringify({
+
+type:type,
+category:category,
+amount:amount,
+date:new Date().toLocaleDateString()
+
+})
+
+})
+
+document.getElementById("popup").style.display="block"
+
+loadGoals()
+
+}
+
 function closePopup(){
 
 document.getElementById("popup").style.display="none"
@@ -402,14 +438,6 @@ el.style.display="block"
 el.style.display="none"
 
 }
-
-}
-  async function loadGoals(){
-
-const res = await fetch(API + "?sheet=goals")
-const data = await res.json()
-
-drawGoalChart(data)
 
 }
 
