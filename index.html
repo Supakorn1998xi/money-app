@@ -1,176 +1,386 @@
-```html
 <!DOCTYPE html>
 <html>
 <head>
-<meta charset="UTF-8">
-<title>Money Tracker</title>
+
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <style>
+
 body{
-font-family:Arial;
-background:#f5f5f5;
-margin:20px;
+font-family:sans-serif;
+background:#f5f7fb;
+padding:20px;
 }
 
-h2{
-margin-top:40px;
-}
-
-.container{
-max-width:900px;
-margin:auto;
+h1{
+margin-bottom:20px;
 }
 
 .card{
 background:white;
 padding:20px;
+border-radius:15px;
+margin-bottom:20px;
+box-shadow:0 5px 15px rgba(0,0,0,0.05);
+}
+
+.balance{
+font-size:36px;
+font-weight:bold;
+color:#2c7be5;
+}
+
+input,select{
+width:100%;
+padding:10px;
+margin-top:10px;
+border-radius:8px;
+border:1px solid #ddd;
+}
+
+button{
+margin-top:10px;
+padding:12px;
+border:none;
 border-radius:10px;
-margin-bottom:30px;
-box-shadow:0 2px 8px rgba(0,0,0,0.1);
+background:#2c7be5;
+color:white;
+width:100%;
+}
+
+.charts{
+display:flex;
+gap:20px;
+flex-wrap:wrap;
 }
 
 canvas{
-max-height:350px;
+max-width:350px;
 }
+
+#history{
+display:none;
+}
+
 </style>
+
 </head>
 
 <body>
 
-<div class="container">
-
-<h1>Money Dashboard</h1>
+<h1>💰 Money Tracker</h1>
 
 <div class="card">
-<h2>Income vs Expense</h2>
-<canvas id="cashChart"></canvas>
+เงินคงเหลือ
+<div class="balance" id="balance">0</div>
 </div>
 
 <div class="card">
-<h2>Savings Allocation</h2>
-<canvas id="savingsChart"></canvas>
+
+<h2>เพิ่มรายการ</h2>
+
+<select id="type" onchange="updateCategory()">
+<option value="income">รายรับ</option>
+<option value="expense">รายจ่าย</option>
+</select>
+
+<select id="category"></select>
+
+<input id="amount" placeholder="จำนวนเงิน">
+
+<button onclick="save()">บันทึก</button>
+
 </div>
 
 <div class="card">
-<h2>Goals Progress</h2>
-<canvas id="goalsChart"></canvas>
+
+<h2>สัดส่วนการเงิน</h2>
+
+<div class="charts">
+
+<div>
+<h4>ค่าใช้จ่าย</h4>
+<canvas id="expenseChart"></canvas>
 </div>
+
+<div>
+<h4>เงินเก็บ</h4>
+<canvas id="savingChart"></canvas>
+</div>
+
+</div>
+
+</div>
+
+<div class="card">
+<h2>เป้าหมาย</h2>
+<canvas id="goalChart"></canvas>
+</div>
+
+<div class="card">
+
+<button onclick="toggleHistory()">ดูประวัติ</button>
+
+<div id="history"></div>
 
 </div>
 
 <script>
 
-const API="https://script.google.com/macros/s/AKfycbzkl3ZDKFPqZNCvZHH65AgifHNBXAvgkgIWwQvjM1gcrTqX73aNgc-gdGcfgFj6TfOgSA/execL";
+const API="https://script.google.com/macros/s/AKfycbzbpK_vp-WGzS-huLYhYCP_25mzcTZT5nR8uqzg8wnAzHQYR72H8ofl6BVoL1Om9UiXug/exec"
 
-const allocation={
-บ้าน:0.25,
-รถ:0.15,
-ลูก:0.15,
-กิน:0.20,
-เที่ยว:0.10,
-น้ำมัน:0.10,
-อื่นๆ:0.05
-};
+let expenseChart
+let savingChart
+let goalChart
 
-async function loadData(){
+function updateCategory(){
 
-const t=await fetch(API+"?sheet=transactions");
-const transactions=await t.json();
+const type=document.getElementById("type").value
+const category=document.getElementById("category")
 
-const g=await fetch(API+"?sheet=goals");
-const goals=await g.json();
+if(type==="expense"){
 
-renderIncomeExpense(transactions);
+category.innerHTML=`
 
-const savings=calculateSavings(transactions);
-renderSavingsChart(savings);
+<option value="house">บ้าน</option>
+<option value="car">รถ</option>
+<option value="child">ลูก</option>
+<option value="food">กิน</option>
+<option value="travel">เที่ยว</option>
+<option value="fuel">น้ำมัน</option>
+<option value="other">อื่นๆ</option>
 
-renderGoals(goals);
+`
 
 }
 
-function calculateSavings(transactions){
+if(type==="income"){
 
-let income=0;
+category.innerHTML=`
+<option value="salary">เงินเดือน</option>
+`
 
-transactions.forEach(t=>{
+}
+
+}
+
+updateCategory()
+
+async function load(){
+
+const res=await fetch(API)
+const data=await res.json()
+
+let income=0
+let expense=0
+
+let house=0
+let car=0
+let child=0
+let food=0
+let travel=0
+let fuel=0
+let other=0
+
+let expFood=0
+let expTravel=0
+let expFuel=0
+
+let historyHTML=""
+
+data.forEach(t=>{
+
+const amount=Number(t.amount) || 0
+
 if(t.type==="income"){
-income+=Number(t.amount);
+
+income+=amount
+
+house += amount * 0.25
+car += amount * 0.15
+child += amount * 0.15
+food += amount * 0.20
+travel += amount * 0.10
+fuel += amount * 0.10
+other += amount * 0.05
+
 }
-});
 
-let result={};
+if(t.type==="expense"){
 
-Object.keys(allocation).forEach(cat=>{
-result[cat]=income*allocation[cat];
-});
+expense+=amount
 
-return result;
+if(t.category==="house") house -= amount
+if(t.category==="car") car -= amount
+if(t.category==="child") child -= amount
+
+if(t.category==="food"){
+food -= amount
+expFood += amount
+}
+
+if(t.category==="travel"){
+travel -= amount
+expTravel += amount
+}
+
+if(t.category==="fuel"){
+fuel -= amount
+expFuel += amount
+}
+
+if(t.category==="other") other -= amount
 
 }
 
-function renderSavingsChart(data){
+historyHTML+=`
+<div>
+${t.date} | ${t.category} | ${amount}
+</div>
+`
 
-new Chart(document.getElementById("savingsChart"),{
-type:'pie',
+})
+
+document.getElementById("balance").innerText=income-expense
+document.getElementById("history").innerHTML=historyHTML
+
+drawExpenseChart(expFood,expTravel,expFuel)
+drawSavingChart(house,car,travel)
+
+loadGoals()
+
+}
+
+function drawExpenseChart(food,travel,fuel){
+
+if(expenseChart) expenseChart.destroy()
+
+expenseChart=new Chart(
+document.getElementById("expenseChart"),
+{
+type:"pie",
 data:{
-labels:Object.keys(data),
+labels:["กิน","เที่ยว","น้ำมัน"],
 datasets:[{
-data:Object.values(data)
+data:[food,travel,fuel],
+backgroundColor:[
+"#ff6b6b",
+"#4dabf7",
+"#ffd43b"
+]
 }]
 }
-});
+}
+)
 
 }
 
-function renderGoals(goals){
+function drawSavingChart(house,car,trip){
 
-new Chart(document.getElementById("goalsChart"),{
-type:'bar',
+if(savingChart) savingChart.destroy()
+
+savingChart=new Chart(
+document.getElementById("savingChart"),
+{
+type:"pie",
 data:{
-labels:goals.map(g=>g.category),
+labels:["บ้าน","รถ","เที่ยว"],
+datasets:[{
+data:[house,car,trip],
+backgroundColor:[
+"#69db7c",
+"#845ef7",
+"#ffa94d"
+]
+}]
+}
+}
+)
+
+}
+
+async function loadGoals(){
+
+try{
+
+const res=await fetch(API+"?sheet=goals")
+const data=await res.json()
+
+const labels=data.map(g=>g.name)
+const saved=data.map(g=>Number(g.saved))
+const target=data.map(g=>Number(g.target))
+
+if(goalChart) goalChart.destroy()
+
+goalChart=new Chart(
+document.getElementById("goalChart"),
+{
+type:"bar",
+data:{
+labels:labels,
 datasets:[
 {
-label:'Saved',
-data:goals.map(g=>Number(g.saved))
+label:"เป้าหมาย",
+data:target,
+backgroundColor:"#e0e0e0"
 },
 {
-label:'Target',
-data:goals.map(g=>Number(g.target))
+label:"เงินเก็บ",
+data:saved,
+backgroundColor:"#2c7be5"
 }
 ]
+},
+options:{
+indexAxis:'y'
 }
-});
-
 }
+)
 
-function renderIncomeExpense(transactions){
-
-let income=0;
-let expense=0;
-
-transactions.forEach(t=>{
-if(t.type==="income") income+=Number(t.amount);
-if(t.type==="expense") expense+=Number(t.amount);
-});
-
-new Chart(document.getElementById("cashChart"),{
-type:'doughnut',
-data:{
-labels:['Income','Expense'],
-datasets:[{
-data:[income,expense]
-}]
+}catch(e){
+console.log("no goals sheet")
 }
-});
 
 }
 
-loadData();
+async function save(){
+
+const type=document.getElementById("type").value
+const category=document.getElementById("category").value
+const amount=document.getElementById("amount").value
+
+await fetch(API,{
+method:"POST",
+body:JSON.stringify({
+type:type,
+category:category,
+amount:amount,
+date:new Date().toLocaleDateString()
+})
+})
+
+alert("บันทึกแล้ว")
+
+location.reload()
+
+}
+
+function toggleHistory(){
+
+const el=document.getElementById("history")
+
+if(el.style.display==="none"){
+el.style.display="block"
+}else{
+el.style.display="none"
+}
+
+}
+
+load()
 
 </script>
 
 </body>
 </html>
-```
