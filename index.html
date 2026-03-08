@@ -6,7 +6,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Money App</title>
+<title>Money Tracker</title>
 
 <link rel="stylesheet" href="style.css">
 
@@ -14,68 +14,75 @@
 
 </head>
 
-
 <body>
 
 <div class="container">
 
-<h2>เงินกองกลางของเรา</h2>
-
-<div class="totalBox">
-฿ <span id="totalMoney">0</span>
+<div class="header">
+💰 Money Tracker
 </div>
 
 
-<div class="card">
+<!-- total -->
+
+<div class="total-card">
+
+<div>ยอดเงินคงเหลือ</div>
+
+<h2>฿<span id="totalMoney">0</span></h2>
+
+</div>
+
+
+<!-- chart -->
+
+<div class="chart-box">
 
 <canvas id="pieChart"></canvas>
 
 </div>
 
 
-<h3>การใช้เงินกองกลาง</h3>
+<!-- transactions -->
 
-<div id="transactionList"></div>
+<div class="transaction-list" id="transactionList"></div>
 
 
-<h3>เพิ่มรายการ</h3>
+<!-- form -->
 
-<div class="formBox">
+<div class="form-box">
 
 <select id="type">
-
 <option value="expense">รายจ่าย</option>
 <option value="income">รายรับ</option>
-
 </select>
 
+<input id="category" placeholder="หมวดหมู่">
 
-<select id="category">
-
-<option value="ค่ากิน">ค่ากิน</option>
-<option value="ค่าน้ำมัน">ค่าน้ำมัน</option>
-<option value="ค่าเที่ยว">ค่าเที่ยว</option>
-<option value="เงินเก็บ">เงินเก็บ</option>
-<option value="เงินเดือน">เงินเดือน</option>
-
-</select>
-
-
-<input
-id="amount"
-type="number"
-placeholder="จำนวนเงิน"
-/>
-
+<input id="amount" type="number" placeholder="จำนวนเงิน">
 
 <button onclick="saveTransaction()">
-
-บันทึก
-
+บันทึกรายการ
 </button>
 
 </div>
 
+</div>
+
+
+<!-- popup -->
+
+<div id="popup" class="popup">
+
+<div class="popup-box">
+
+<h3>บันทึกเรียบร้อย</h3>
+
+<p>รายการถูกบันทึกแล้ว</p>
+
+<button onclick="closePopup()">ปิด</button>
+
+</div>
 
 </div>
 
@@ -83,5 +90,4 @@ placeholder="จำนวนเงิน"
 <script src="app.js"></script>
 
 </body>
-
 </html>
