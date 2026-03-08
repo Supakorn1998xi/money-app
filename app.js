@@ -21,7 +21,7 @@ renderGoalChart()
 
 
 
-const API_URL = "https://script.google.com/macros/s/AKfycbwqqhi9c47fwoqlZ6sABBMBzPntzPV1ANP6RfMClCdKIG3ixx04mXNBfo6ST7ufImCtTQ/exec"
+const API_URL = "https://script.google.com/macros/s/AKfycbz8yxfXxJyP2trYuTWhIJacum8pXiV9SDicVW7Rdwrb0y13CixQSpNFuGZi7bVss48w1A/exec"
 
 let chart = null
 let goalChart = null
