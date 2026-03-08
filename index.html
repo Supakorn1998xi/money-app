@@ -2,49 +2,204 @@
 <html lang="th">
 <head>
 <meta charset="UTF-8">
-<title>กองกลางของเรา</title>
-
-<link rel="stylesheet" href="style.css">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Money Together</title>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<style>
+
+body{
+font-family: sans-serif;
+background:#eef2f7;
+margin:0;
+padding:20px;
+}
+
+.container{
+max-width:420px;
+margin:auto;
+}
+
+.card{
+background:white;
+border-radius:20px;
+padding:20px;
+margin-bottom:20px;
+box-shadow:0 4px 10px rgba(0,0,0,0.05);
+}
+
+.balance{
+font-size:36px;
+font-weight:bold;
+text-align:center;
+margin-top:10px;
+}
+
+.row{
+display:flex;
+align-items:center;
+justify-content:space-between;
+margin-top:10px;
+}
+
+.progress{
+height:12px;
+background:#e3e7ef;
+border-radius:10px;
+overflow:hidden;
+margin-top:5px;
+}
+
+.bar{
+height:100%;
+background:linear-gradient(90deg,#38bdf8,#3b82f6);
+}
+
+.list-item{
+display:flex;
+justify-content:space-between;
+padding:10px 0;
+border-bottom:1px solid #eee;
+}
+
+.btn{
+width:100%;
+padding:14px;
+border:none;
+border-radius:12px;
+background:#3b82f6;
+color:white;
+font-size:16px;
+margin-top:15px;
+}
+
+.category{
+display:flex;
+gap:10px;
+margin-top:10px;
+}
+
+.tag{
+padding:6px 12px;
+border-radius:20px;
+font-size:13px;
+color:white;
+}
+
+.food{background:#f97316}
+.gas{background:#3b82f6}
+.travel{background:#22c55e}
+
+</style>
 
 </head>
 
 <body>
 
-<div class="app">
-
-<h1>เงินกองกลางของเรา</h1>
-
-<div class="balance-box">
-฿<span id="balance">0</span>
-</div>
+<div class="container">
 
 <div class="card">
 
-<canvas id="pieChart"></canvas>
+<h3>เงินกองกลางของเรา</h3>
 
-</div>
+<div class="balance">฿186,500</div>
 
-<div class="card">
-
-<h2>เป้าหมายร่วมกัน</h2>
-
-<div id="goals"></div>
+<canvas id="chart"></canvas>
 
 </div>
 
 <div class="card">
 
-<h2>การใช้เงินกองกลาง</h2>
+<h3>เป้าหมายร่วมกัน</h3>
 
-<div id="transactions"></div>
+<div class="row">
+<div>
+🏠 บ้าน  
+<br>80,000 / 500,000
+<div class="progress">
+<div class="bar" style="width:11%"></div>
+</div>
+</div>
+<span>11%</span>
+</div>
+
+<div class="row">
+<div>
+🚗 รถ  
+<br>22,000 / 300,000
+<div class="progress">
+<div class="bar" style="width:12%"></div>
+</div>
+</div>
+<span>12%</span>
+</div>
+
+<div class="row">
+<div>
+✈️ เที่ยว  
+<br>13,000 / 200,000
+<div class="progress">
+<div class="bar" style="width:10%"></div>
+</div>
+</div>
+<span>10%</span>
+</div>
+
+</div>
+
+<div class="card">
+
+<h3>การใช้เงินกองกลาง</h3>
+
+<div class="category">
+<div class="tag food">ค่ากิน</div>
+<div class="tag gas">ค่าน้ำมัน</div>
+<div class="tag travel">ค่าเที่ยว</div>
+</div>
+
+<div class="list-item">
+<span>2 มี.ค. เติมน้ำมัน</span>
+<span style="color:red">-฿800</span>
+</div>
+
+<div class="list-item">
+<span>1 มี.ค. หมูกระทะ</span>
+<span style="color:red">-฿450</span>
+</div>
+
+<div class="list-item">
+<span>28 ก.พ. เติมเงิน</span>
+<span style="color:green">+฿55,000</span>
+</div>
+
+<button class="btn">+ เพิ่มรายการ</button>
 
 </div>
 
 </div>
 
-<script src="app.js"></script>
+<script>
+
+const ctx = document.getElementById('chart')
+
+new Chart(ctx,{
+type:'doughnut',
+data:{
+labels:['ค่ากิน','ค่าน้ำมัน','ค่าเที่ยว','เงินเก็บ'],
+datasets:[{
+data:[35000,22000,18000,111500],
+backgroundColor:[
+'#f97316',
+'#3b82f6',
+'#22c55e',
+'#06b6d4'
+]
+}]
+}
+})
+
+</script>
 
 </body>
 </html>
