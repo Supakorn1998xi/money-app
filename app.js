@@ -2,7 +2,8 @@ const API_URL = "https://script.google.com/macros/s/AKfycbwqqhi9c47fwoqlZ6sABBMB
 
 let chart = null
 
-// โหลดข้อมูลจาก API
+
+
 function loadData(){
 
 fetch(API_URL)
@@ -14,17 +15,12 @@ renderChart(data)
 renderTransactions(data)
 
 })
-.catch(err => {
-
-console.log("โหลดข้อมูลไม่สำเร็จ", err)
-
-})
+.catch(err => console.log(err))
 
 }
 
 
 
-// คำนวณเงินรวม
 function renderTotal(list){
 
 let total = 0
@@ -46,7 +42,6 @@ total.toLocaleString()
 
 
 
-// สร้างกราฟวงกลม
 function renderChart(list){
 
 let categories = {}
@@ -69,6 +64,8 @@ let labels = Object.keys(categories)
 let values = Object.values(categories)
 
 const ctx = document.getElementById("pieChart")
+
+if(!ctx) return
 
 if(chart){
 chart.destroy()
@@ -95,10 +92,11 @@ responsive:true
 
 
 
-// แสดงรายการธุรกรรม
 function renderTransactions(list){
 
 let box = document.getElementById("transactionList")
+
+if(!box) return
 
 box.innerHTML = ""
 
@@ -108,24 +106,15 @@ let color = t.type === "income" ? "green" : "red"
 let sign = t.type === "income" ? "+" : "-"
 
 box.innerHTML += `
-
 <div class="transaction">
-
 <div>
-
 <b>${t.category}</b><br>
 ${new Date(t.date).toLocaleDateString()}
-
 </div>
-
 <div style="color:${color}">
-
 ${sign}${Number(t.amount).toLocaleString()}
-
 </div>
-
 </div>
-
 `
 
 })
@@ -134,7 +123,6 @@ ${sign}${Number(t.amount).toLocaleString()}
 
 
 
-// เพิ่มรายการใหม่
 function saveTransaction(){
 
 let type = document.getElementById("type").value
@@ -142,30 +130,22 @@ let category = document.getElementById("category").value
 let amount = document.getElementById("amount").value
 
 if(!amount){
-
 alert("กรอกจำนวนเงิน")
-
 return
-
 }
 
 fetch(API_URL,{
-
 method:"POST",
-
 body:JSON.stringify({
-
 type:type,
 category:category,
 amount:amount
-
 })
-
 })
 .then(res => res.text())
 .then(() => {
 
-document.getElementById("amount").value = ""
+document.getElementById("amount").value=""
 
 loadData()
 
@@ -175,5 +155,4 @@ loadData()
 
 
 
-// โหลดข้อมูลเมื่อเปิดเว็บ
 loadData()
