@@ -246,7 +246,7 @@ document.getElementById("balance").innerText=income-expense
 document.getElementById("history").innerHTML=historyHTML
 
 drawExpenseChart(expFood,expTravel,expFuel)
-drawSavingChart(house,car,travel)
+drawSavingChart(house,car,child,food,travel,fuel,other)
 
 loadGoals()
 
@@ -276,7 +276,7 @@ backgroundColor:[
 
 }
 
-function drawSavingChart(house,car,trip){
+function drawSavingChart(house,car,child,food,travel,fuel,other){
 
 if(savingChart) savingChart.destroy()
 
@@ -285,13 +285,17 @@ document.getElementById("savingChart"),
 {
 type:"pie",
 data:{
-labels:["บ้าน","รถ","เที่ยว"],
+labels:["บ้าน","รถ","ลูก","กิน","เที่ยว","น้ำมัน","อื่นๆ"],
 datasets:[{
-data:[house,car,trip],
+data:[house,car,child,food,travel,fuel,other],
 backgroundColor:[
 "#69db7c",
 "#845ef7",
-"#ffa94d"
+"#20c997",
+"#ffd43b",
+"#ffa94d",
+"#4dabf7",
+"#adb5bd"
 ]
 }]
 }
