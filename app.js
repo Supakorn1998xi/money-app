@@ -15,7 +15,6 @@ renderChart(data)
 renderTransactions(data)
 
 })
-.catch(err => console.log(err))
 
 }
 
@@ -65,8 +64,6 @@ let values = Object.values(categories)
 
 const ctx = document.getElementById("pieChart")
 
-if(!ctx) return
-
 if(chart){
 chart.destroy()
 }
@@ -96,25 +93,27 @@ function renderTransactions(list){
 
 let box = document.getElementById("transactionList")
 
-if(!box) return
-
 box.innerHTML = ""
 
 list.slice().reverse().forEach(t => {
 
-let color = t.type === "income" ? "green" : "red"
+let cls = t.type === "income" ? "income" : "expense"
 let sign = t.type === "income" ? "+" : "-"
 
 box.innerHTML += `
+
 <div class="transaction">
+
 <div>
-<b>${t.category}</b><br>
-${new Date(t.date).toLocaleDateString()}
+<b>${t.category}</b>
 </div>
-<div style="color:${color}">
+
+<div class="${cls}">
 ${sign}${Number(t.amount).toLocaleString()}
 </div>
+
 </div>
+
 `
 
 })
@@ -149,8 +148,22 @@ document.getElementById("amount").value=""
 
 loadData()
 
+showPopup()
+
 })
 
+}
+
+
+
+function showPopup(){
+document.getElementById("popup").style.display="flex"
+}
+
+
+
+function closePopup(){
+document.getElementById("popup").style.display="none"
 }
 
 
