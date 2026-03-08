@@ -3,62 +3,93 @@
 <head>
 
 <meta name="viewport" content="width=device-width, initial-scale=1">
-
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <style>
 
 body{
 font-family:sans-serif;
+background:#f2f2f2;
 padding:20px;
-background:#f5f5f5;
+}
+
+h1,h2{
+margin:5px 0;
 }
 
 .card{
 background:white;
 padding:20px;
-border-radius:12px;
+border-radius:15px;
 margin-bottom:20px;
+box-shadow:0 3px 10px rgba(0,0,0,0.05);
+}
+
+.balance{
+font-size:36px;
+font-weight:bold;
+color:#2c7be5;
+}
+
+input,select{
+width:100%;
+padding:10px;
+margin-top:10px;
+border-radius:8px;
+border:1px solid #ddd;
 }
 
 button{
-padding:10px 15px;
+margin-top:10px;
+padding:10px;
 border:none;
 border-radius:8px;
-background:#4CAF50;
+background:#2c7be5;
 color:white;
+width:100%;
+}
+
+#history{
+display:none;
 }
 
 .popup{
+
 position:fixed;
 top:50%;
 left:50%;
 transform:translate(-50%,-50%);
 background:white;
-padding:20px;
-border-radius:10px;
+padding:30px;
+border-radius:12px;
+box-shadow:0 0 15px rgba(0,0,0,0.2);
 display:none;
-box-shadow:0 0 10px rgba(0,0,0,0.2);
+
+}
+
+.popup button{
+background:#555;
 }
 
 </style>
+
 </head>
 
 <body>
 
-<h2>💰 Money Tracker</h2>
+<h1>💰 Money Tracker</h1>
 
 <div class="card">
 
 เงินคงเหลือ
 
-<h1 id="balance">0</h1>
+<div class="balance" id="balance">0</div>
 
 </div>
 
 <div class="card">
 
-<h3>เพิ่มรายการ</h3>
+<h2>เพิ่มรายการ</h2>
 
 <select id="type">
 <option value="income">รายรับ</option>
@@ -81,28 +112,48 @@ box-shadow:0 0 10px rgba(0,0,0,0.2);
 </div>
 
 <div class="card">
-<h3>สัดส่วนค่าใช้จ่าย</h3>
+
+<h2>สัดส่วนค่าใช้จ่าย</h2>
+
 <canvas id="pie"></canvas>
+
 </div>
 
 <div class="card">
-<h3>เป้าหมาย</h3>
+
+<h2>เป้าหมาย</h2>
+
 <canvas id="bar"></canvas>
+
+</div>
+
+<div class="card">
+
+<button onclick="toggleHistory()">ดูประวัติ</button>
+
+<div id="history"></div>
+
 </div>
 
 <div class="popup" id="popup">
-บันทึกแล้ว ✅
-<br><br>
+
+<h2>บันทึกแล้ว ✅</h2>
+
 <button onclick="closePopup()">ปิด</button>
+
 </div>
 
 <script>
 
 const API="https://script.google.com/macros/s/AKfycbw_B9tUOOJbSmkJeaqHX263c79AdL5oMv5dfO7fTsSwU3QHEeLJSgPDJ4E36aZ6kKjmng/exec"
 
+let pieChart
+let barChart
+
 async function load(){
 
 const res=await fetch(API)
+
 const data=await res.json()
 
 let income=0
@@ -113,11 +164,14 @@ let travel=0
 let fuel=0
 let future=0
 
+let historyHTML=""
+
 data.forEach(t=>{
 
 if(t.type=="income") income+=Number(t.amount)
 
 if(t.type=="expense"){
+
 expense+=Number(t.amount)
 
 if(t.category=="food") food+=Number(t.amount)
@@ -127,31 +181,77 @@ if(t.category=="future") future+=Number(t.amount)
 
 }
 
+historyHTML+=`
+<div>
+${t.date} - ${t.category} - ${t.amount}
+</div>
+`
+
 })
 
 document.getElementById("balance").innerText=income-expense
 
+document.getElementById("history").innerHTML=historyHTML
+
 drawPie(food,travel,fuel,future)
+
+drawBar()
 
 }
 
 function drawPie(food,travel,fuel,future){
 
-new Chart(document.getElementById("pie"),{
+if(pieChart) pieChart.destroy()
 
+pieChart=new Chart(
+
+document.getElementById("pie"),
+
+{
 type:"pie",
 
 data:{
 labels:["กิน","เที่ยว","น้ำมัน","เก็บอนาคต"],
 
 datasets:[{
-
 data:[food,travel,fuel,future]
-
 }]
 }
 
-})
+}
+
+)
+
+}
+
+function drawBar(){
+
+if(barChart) barChart.destroy()
+
+barChart=new Chart(
+
+document.getElementById("bar"),
+
+{
+type:"bar",
+
+data:{
+
+labels:["บ้าน","รถ","ลูก"],
+
+datasets:[{
+
+label:"เงินเก็บ",
+
+data:[300000,100000,50000]
+
+}]
+
+}
+
+}
+
+)
 
 }
 
@@ -170,7 +270,7 @@ body:JSON.stringify({
 type:type,
 category:category,
 amount:amount,
-date:new Date()
+date:new Date().toLocaleDateString()
 
 })
 
@@ -185,6 +285,22 @@ load()
 function closePopup(){
 
 document.getElementById("popup").style.display="none"
+
+}
+
+function toggleHistory(){
+
+const el=document.getElementById("history")
+
+if(el.style.display=="none"){
+
+el.style.display="block"
+
+}else{
+
+el.style.display="none"
+
+}
 
 }
 
