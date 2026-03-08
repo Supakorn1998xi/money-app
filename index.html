@@ -128,7 +128,7 @@ display:none;
 
 <script>
 
-const API="https://script.google.com/macros/s/AKfycbzbpK_vp-WGzS-huLYhYCP_25mzcTZT5nR8uqzg8wnAzHQYR72H8ofl6BVoL1Om9UiXug/exec"
+const API="YOUR_GOOGLE_SCRIPT_URL"
 
 let expenseChart
 let savingChart
@@ -183,27 +183,31 @@ let travel=0
 let fuel=0
 let other=0
 
+let expHouse=0
+let expCar=0
+let expChild=0
 let expFood=0
 let expTravel=0
 let expFuel=0
+let expOther=0
 
 let historyHTML=""
 
 data.forEach(t=>{
 
-const amount=Number(t.amount) || 0
+const amount=Number(t.amount)||0
 
 if(t.type==="income"){
 
 income+=amount
 
-house += amount * 0.25
-car += amount * 0.15
-child += amount * 0.15
-food += amount * 0.20
-travel += amount * 0.10
-fuel += amount * 0.10
-other += amount * 0.05
+house+=amount*0.25
+car+=amount*0.15
+child+=amount*0.15
+food+=amount*0.20
+travel+=amount*0.10
+fuel+=amount*0.10
+other+=amount*0.05
 
 }
 
@@ -211,33 +215,45 @@ if(t.type==="expense"){
 
 expense+=amount
 
-if(t.category==="house") house -= amount
-if(t.category==="car") car -= amount
-if(t.category==="child") child -= amount
+if(t.category==="house"){
+house-=amount
+expHouse+=amount
+}
+
+if(t.category==="car"){
+car-=amount
+expCar+=amount
+}
+
+if(t.category==="child"){
+child-=amount
+expChild+=amount
+}
 
 if(t.category==="food"){
-food -= amount
-expFood += amount
+food-=amount
+expFood+=amount
 }
 
 if(t.category==="travel"){
-travel -= amount
-expTravel += amount
+travel-=amount
+expTravel+=amount
 }
 
 if(t.category==="fuel"){
-fuel -= amount
-expFuel += amount
+fuel-=amount
+expFuel+=amount
 }
 
-if(t.category==="other") other -= amount
+if(t.category==="other"){
+other-=amount
+expOther+=amount
+}
 
 }
 
 historyHTML+=`
-<div>
-${t.date} | ${t.category} | ${amount}
-</div>
+<div>${t.date} | ${t.category} | ${amount}</div>
 `
 
 })
@@ -245,14 +261,31 @@ ${t.date} | ${t.category} | ${amount}
 document.getElementById("balance").innerText=income-expense
 document.getElementById("history").innerHTML=historyHTML
 
-drawExpenseChart(expFood,expTravel,expFuel)
-drawSavingChart(house,car,child,food,travel,fuel,other)
+drawExpenseChart(
+expHouse,
+expCar,
+expChild,
+expFood,
+expTravel,
+expFuel,
+expOther
+)
+
+drawSavingChart(
+house,
+car,
+child,
+food,
+travel,
+fuel,
+other
+)
 
 loadGoals()
 
 }
 
-function drawExpenseChart(food,travel,fuel){
+function drawExpenseChart(house,car,child,food,travel,fuel,other){
 
 if(expenseChart) expenseChart.destroy()
 
@@ -261,13 +294,33 @@ document.getElementById("expenseChart"),
 {
 type:"pie",
 data:{
-labels:["กิน","เที่ยว","น้ำมัน"],
+labels:[
+"บ้าน",
+"รถ",
+"ลูก",
+"กิน",
+"เที่ยว",
+"น้ำมัน",
+"อื่นๆ"
+],
 datasets:[{
-data:[food,travel,fuel],
+data:[
+house,
+car,
+child,
+food,
+travel,
+fuel,
+other
+],
 backgroundColor:[
 "#ff6b6b",
+"#845ef7",
+"#20c997",
+"#ffd43b",
+"#ffa94d",
 "#4dabf7",
-"#ffd43b"
+"#adb5bd"
 ]
 }]
 }
@@ -285,9 +338,25 @@ document.getElementById("savingChart"),
 {
 type:"pie",
 data:{
-labels:["บ้าน","รถ","ลูก","กิน","เที่ยว","น้ำมัน","อื่นๆ"],
+labels:[
+"บ้าน",
+"รถ",
+"ลูก",
+"กิน",
+"เที่ยว",
+"น้ำมัน",
+"อื่นๆ"
+],
 datasets:[{
-data:[house,car,child,food,travel,fuel,other],
+data:[
+house,
+car,
+child,
+food,
+travel,
+fuel,
+other
+],
 backgroundColor:[
 "#69db7c",
 "#845ef7",
@@ -311,9 +380,30 @@ try{
 const res=await fetch(API+"?sheet=goals")
 const data=await res.json()
 
-const labels=data.map(g=>g.name)
-const saved=data.map(g=>Number(g.saved))
-const target=data.map(g=>Number(g.target))
+const categories=[
+"บ้าน","รถ","ลูก","กิน","เที่ยว","น้ำมัน","อื่นๆ"
+]
+
+let saved=[]
+let target=[]
+
+categories.forEach(cat=>{
+
+const found=data.find(g=>g.name===cat)
+
+if(found){
+
+saved.push(Number(found.saved))
+target.push(Number(found.target))
+
+}else{
+
+saved.push(0)
+target.push(0)
+
+}
+
+})
 
 if(goalChart) goalChart.destroy()
 
@@ -322,7 +412,7 @@ document.getElementById("goalChart"),
 {
 type:"bar",
 data:{
-labels:labels,
+labels:categories,
 datasets:[
 {
 label:"เป้าหมาย",
@@ -343,7 +433,9 @@ indexAxis:'y'
 )
 
 }catch(e){
+
 console.log("no goals sheet")
+
 }
 
 }
