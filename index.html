@@ -3,7 +3,6 @@
 <head>
 
 <meta name="viewport" content="width=device-width, initial-scale=1">
-
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <style>
@@ -12,10 +11,6 @@ body{
 font-family:sans-serif;
 background:#f5f7fb;
 padding:20px;
-}
-
-h1{
-margin-bottom:20px;
 }
 
 .card{
@@ -48,12 +43,6 @@ border-radius:10px;
 background:#2c7be5;
 color:white;
 width:100%;
-}
-
-.charts{
-display:flex;
-gap:20px;
-flex-wrap:wrap;
 }
 
 canvas{
@@ -89,7 +78,6 @@ display:none;
 <select id="category"></select>
 
 <input id="amount" placeholder="จำนวนเงิน">
-
 <input id="note" placeholder="รายละเอียด">
 
 <button onclick="save()">บันทึก</button>
@@ -97,34 +85,13 @@ display:none;
 </div>
 
 <div class="card">
-
-<h2>สัดส่วนการเงิน</h2>
-
-<div class="charts">
-
-<div>
-<h4>ค่าใช้จ่าย</h4>
-<canvas id="expenseChart"></canvas>
-</div>
-
-<div>
-<h4>เงินเก็บ</h4>
-<canvas id="savingChart"></canvas>
-</div>
-
-</div>
-
-</div>
-
-<div class="card">
-<h2>เป้าหมาย</h2>
-<canvas id="goalChart"></canvas>
+<h2>งบแต่ละหมวด</h2>
+<canvas id="budgetChart"></canvas>
 </div>
 
 <div class="card">
 
 <button onclick="toggleHistory()">ดูประวัติ</button>
-
 <div id="history"></div>
 
 </div>
@@ -133,14 +100,31 @@ display:none;
 
 const API="https://script.google.com/macros/s/AKfycbzbpK_vp-WGzS-huLYhYCP_25mzcTZT5nR8uqzg8wnAzHQYR72H8ofl6BVoL1Om9UiXug/exec"
 
-let expenseChart
-let savingChart
-let goalChart
+let chart
+
+// สัดส่วนเงินเดือน
+const ratio={
+house:0.25,
+car:0.15,
+child:0.15,
+food:0.20,
+travel:0.10,
+fuel:0.10,
+other:0.05
+}
 
 function updateCategory(){
 
 const type=document.getElementById("type").value
 const category=document.getElementById("category")
+
+if(type==="income"){
+
+category.innerHTML=`
+<option value="salary">เงินเดือน</option>
+`
+
+}
 
 if(type==="expense"){
 
@@ -149,20 +133,10 @@ category.innerHTML=`
 <option value="house">บ้าน</option>
 <option value="car">รถ</option>
 <option value="child">ลูก</option>
-<option value="travel">เที่ยว</option>
 <option value="food">กิน</option>
+<option value="travel">เที่ยว</option>
 <option value="fuel">น้ำมัน</option>
 <option value="other">อื่นๆ</option>
-
-`
-
-}
-
-if(type==="income"){
-
-category.innerHTML=`
-
-<option value="salary">เงินเดือน</option>
 
 `
 
@@ -180,23 +154,33 @@ const data=await res.json()
 let income=0
 let expense=0
 
-let food=0
-let travel=0
-let fuel=0
-let house=0
-let car=0
-let child=0
-let other=0
+let bucket={
+house:0,
+car:0,
+child:0,
+food:0,
+travel:0,
+fuel:0,
+other:0
+}
 
 let historyHTML=""
 
 data.forEach(t=>{
 
-const amount=Number(t.amount) || 0
+const amount=Number(t.amount)||0
 
 if(t.type==="income"){
 
 income+=amount
+
+bucket.house+=amount*ratio.house
+bucket.car+=amount*ratio.car
+bucket.child+=amount*ratio.child
+bucket.food+=amount*ratio.food
+bucket.travel+=amount*ratio.travel
+bucket.fuel+=amount*ratio.fuel
+bucket.other+=amount*ratio.other
 
 }
 
@@ -204,19 +188,15 @@ if(t.type==="expense"){
 
 expense+=amount
 
-if(t.category==="food") food+=amount
-if(t.category==="travel") travel+=amount
-if(t.category==="fuel") fuel+=amount
-if(t.category==="house") house+=amount
-if(t.category==="car") car+=amount
-if(t.category==="child") child+=amount
-if(t.category==="other") other+=amount
+if(bucket[t.category]!==undefined){
+bucket[t.category]-=amount
+}
 
 }
 
 historyHTML+=`
 <div>
-${t.date} | ${t.category} | ${amount} | ${t.note || ""}
+${t.date} | ${t.category} | ${amount} | ${t.note||""}
 </div>
 `
 
@@ -225,102 +205,46 @@ ${t.date} | ${t.category} | ${amount} | ${t.note || ""}
 document.getElementById("balance").innerText=income-expense
 document.getElementById("history").innerHTML=historyHTML
 
-drawExpenseChart(food,travel,fuel)
-drawSavingChart(house,car,child)
-
-loadGoals()
+drawChart(bucket)
 
 }
 
-function drawExpenseChart(food,travel,fuel){
+function drawChart(bucket){
 
-if(expenseChart) expenseChart.destroy()
+const labels=[
+"บ้าน",
+"รถ",
+"ลูก",
+"กิน",
+"เที่ยว",
+"น้ำมัน",
+"อื่นๆ"
+]
 
-expenseChart=new Chart(
-document.getElementById("expenseChart"),
+const values=[
+bucket.house,
+bucket.car,
+bucket.child,
+bucket.food,
+bucket.travel,
+bucket.fuel,
+bucket.other
+]
+
+if(chart) chart.destroy()
+
+chart=new Chart(
+document.getElementById("budgetChart"),
 {
 type:"pie",
-data:{
-labels:["กิน","เที่ยว","น้ำมัน"],
-datasets:[{
-data:[food,travel,fuel],
-backgroundColor:[
-"#ff6b6b",
-"#4dabf7",
-"#ffd43b"
-]
-}]
-}
-}
-)
-
-}
-
-function drawSavingChart(house,car,child){
-
-if(savingChart) savingChart.destroy()
-
-savingChart=new Chart(
-document.getElementById("savingChart"),
-{
-type:"pie",
-data:{
-labels:["บ้าน","รถ","ลูก"],
-datasets:[{
-data:[house,car,child],
-backgroundColor:[
-"#69db7c",
-"#845ef7",
-"#ffa94d"
-]
-}]
-}
-}
-)
-
-}
-
-async function loadGoals(){
-
-try{
-
-const res=await fetch(API+"?sheet=goals")
-const data=await res.json()
-
-const labels=data.map(g=>g.name)
-const saved=data.map(g=>Number(g.saved))
-const target=data.map(g=>Number(g.target))
-
-if(goalChart) goalChart.destroy()
-
-goalChart=new Chart(
-document.getElementById("goalChart"),
-{
-type:"bar",
 data:{
 labels:labels,
-datasets:[
-{
-label:"เป้าหมาย",
-data:target,
-backgroundColor:"#e0e0e0"
-},
-{
-label:"เงินเก็บ",
-data:saved,
-backgroundColor:"#2c7be5"
-}
-]
-},
-options:{
-indexAxis:'y'
+datasets:[{
+data:values
+}]
 }
 }
 )
-
-}catch(e){
-console.log("no goals sheet")
-}
 
 }
 
@@ -343,7 +267,6 @@ date:new Date().toLocaleDateString()
 })
 
 alert("บันทึกแล้ว")
-
 location.reload()
 
 }
