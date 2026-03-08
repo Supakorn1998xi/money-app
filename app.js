@@ -1,41 +1,94 @@
-const API = "https://script.google.com/macros/s/AKfycbwMkQZZRGh6ffE8yTgasdlIIGeIt9EeM4X5imtSuxKYOQQmZ-ceGxfxJsVExy14lHpjsg/exec"
-async function loadData(){
+const API_URL = "https://script.google.com/macros/s/AKfycbwMkQZZRGh6ffE8yTgasdlIIGeIt9EeM4X5imtSuxKYOQQmZ-ceGxfxJsVExy14lHpjsg/exec"
 
-const res = await fetch(API)
-const data = await res.json()
+let chart
 
-let html = ""
-let balance = 0
+function loadData(){
 
-let food = 0
-let gas = 0
-let travel = 0
+fetch(API_URL)
+.then(res=>res.json())
+.then(data=>{
 
-data.forEach(item => {
+renderTotal(data)
+renderChart(data)
+renderGoals(data.goals)
+renderTransactions(data.transactions)
 
-if(item.type === "income"){
-balance += Number(item.amount)
-}else{
-balance -= Number(item.amount)
+})
+
 }
 
-if(item.category === "food") food += Number(item.amount)
-if(item.category === "gas") gas += Number(item.amount)
-if(item.category === "travel") travel += Number(item.amount)
+function renderTotal(data){
 
-html += `
+let total = data.transactions.reduce((sum,t)=>{
 
-<div class="item">
+if(t.type=="income") return sum + Number(t.amount)
+else return sum - Number(t.amount)
 
-<b>${item.note}</b><br>
+},0)
 
-${item.category} - ${item.amount}
+document.getElementById("totalMoney").innerText = total.toLocaleString()
 
-<br><br>
+}
 
-<button onclick="deleteItem('${item.id}')">
-ลบ
-</button>
+function renderChart(data){
+
+let categories={}
+
+data.transactions.forEach(t=>{
+
+if(t.type=="expense"){
+
+if(!categories[t.category]) categories[t.category]=0
+
+categories[t.category]+=Number(t.amount)
+
+}
+
+})
+
+let labels=Object.keys(categories)
+let values=Object.values(categories)
+
+const ctx=document.getElementById("pieChart")
+
+chart=new Chart(ctx,{
+
+type:'doughnut',
+
+data:{
+labels:labels,
+datasets:[{
+data:values
+}]
+}
+
+})
+
+}
+
+function renderGoals(goals){
+
+let box=document.getElementById("goalList")
+
+box.innerHTML=""
+
+goals.forEach(g=>{
+
+let percent=Math.floor(g.saved/g.target*100)
+
+box.innerHTML+=`
+
+<div class="goal">
+
+<b>${g.name}</b>
+
+<p>${g.saved}/${g.target}</p>
+
+<div class="progress">
+
+<div class="progress-bar" style="width:${percent}%"></div>
+
+</div>
 
 </div>
 
@@ -43,74 +96,65 @@ ${item.category} - ${item.amount}
 
 })
 
-document.getElementById("list").innerHTML = html
-
-document.getElementById("balance").innerText =
-"฿" + balance.toLocaleString()
-
-drawChart(food,gas,travel)
-
 }
 
-function drawChart(food,gas,travel){
+function renderTransactions(list){
 
-new Chart(document.getElementById("chart"),{
+let box=document.getElementById("transactionList")
 
-type:"doughnut",
+box.innerHTML=""
 
-data:{
-labels:["อาหาร","น้ำมัน","เที่ยว"],
+list.slice().reverse().forEach(t=>{
 
-datasets:[{
+let color = t.type=="income" ? "green":"red"
+let sign = t.type=="income" ? "+" : "-"
 
-data:[food,gas,travel]
+box.innerHTML+=`
 
-}]
+<div class="transaction">
 
-}
+<div>
+
+<b>${t.category}</b><br>
+${t.date}
+
+</div>
+
+<div style="color:${color}">
+
+${sign}${t.amount}
+
+</div>
+
+</div>
+
+`
 
 })
 
 }
 
-async function addItem(){
+function addTransaction(){
 
-let data = {
+let type=prompt("income / expense")
+let category=prompt("หมวด")
+let amount=prompt("จำนวนเงิน")
 
-id: Date.now(),
+fetch(API_URL,{
 
-type: document.getElementById("type").value,
-
-category: document.getElementById("category").value,
-
-amount: document.getElementById("amount").value,
-
-note: document.getElementById("note").value,
-
-user: "user1"
-
-}
-
-await fetch(API,{
 method:"POST",
-body:JSON.stringify(data)
+
+body:JSON.stringify({
+
+action:"addTransaction",
+
+type:type,
+category:category,
+amount:amount
+
 })
 
-document.getElementById("category").value=""
-document.getElementById("amount").value=""
-document.getElementById("note").value=""
-
-loadData()
-
-}
-
-async function deleteItem(id){
-
-await fetch(API + "?id=" + id,{
-method:"DELETE"
-})
-
-loadData()
+}).then(()=>loadData())
 
 }
 
