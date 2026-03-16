@@ -245,12 +245,40 @@ color:#666;
 <br>
 <div id="summaryPage" style="display:none">
 
-    <div class="card">
-        <h2>📊 สรุปรายเดือน</h2>
-        <p>แสดงรายรับ รายจ่าย และเงินเก็บของเดือน</p>
+<div class="card">
+<h2>📊 สรุปรายเดือน</h2>
 
-        <canvas id="monthlyChart"></canvas>
-    </div>
+<div class="charts">
+
+<div class="card">
+<h4>💰 เงินเข้าเดือนนี้</h4>
+<div class="balance" id="sumIncome">0</div>
+</div>
+
+<div class="card">
+<h4>💸 เงินออกเดือนนี้</h4>
+<div class="balance" id="sumExpense">0</div>
+</div>
+
+<div class="card">
+<h4>📈 เงินสุทธิเดือนนี้</h4>
+<div class="balance" id="sumNet">0</div>
+</div>
+
+<div class="card">
+<h4>🏦 ยอดสะสมทั้งหมด</h4>
+<div class="balance" id="sumTotal">0</div>
+</div>
+
+</div>
+
+</div>
+
+<div class="card">
+<h3>กราฟรายเดือน</h3>
+<canvas id="monthlyChart"></canvas>
+</div>
+
 </div>
 
 
@@ -326,6 +354,45 @@ color:#666;
 </div>
 </div>
 <script>
+
+function drawMonthlyChart(income,expense){
+
+const net = income-expense
+
+if(window.monthlyChartObj) window.monthlyChartObj.destroy()
+
+window.monthlyChartObj = new Chart(
+document.getElementById("monthlyChart"),
+{
+type:"bar",
+data:{
+labels:["เงินเข้า","เงินออก","สุทธิ"],
+datasets:[{
+data:[income,expense,net],
+backgroundColor:[
+"#20c997",
+"#ff6b6b",
+"#4dabf7"
+]
+}]
+},
+options:{
+plugins:{
+legend:{display:false}
+},
+scales:{
+y:{
+ticks:{
+callback:v=>v.toLocaleString()
+}
+}
+}
+}
+}
+)
+}
+
+const START_BALANCE = 334599.63
 
 function showLoading(){
 document.getElementById("loadingOverlay").style.display="flex"
@@ -632,6 +699,7 @@ const data=await res.json()
 let income=0
 let expense=0
 
+
 let house=0
 let car=0
 let child=0
@@ -661,12 +729,17 @@ let historyHTML = `
 <tbody>
 `
 
+
+
 const selectedMonth = monthFilter.value
 
 const historyData = data
 .filter(t=>{
     const tDate = new Date(t.date)
-    const tMonth = tDate.toISOString().slice(0,7)
+
+    const tMonth =
+    tDate.getFullYear()+"-"+String(tDate.getMonth()+1).padStart(2,"0")
+
     return tMonth === selectedMonth
 })
 .sort((a,b)=> new Date(b.date) - new Date(a.date))
@@ -675,7 +748,8 @@ const historyData = data
 data.forEach(t=>{
 
 const tDate = new Date(t.date)
-const tMonth = tDate.toISOString().slice(0,7)
+const tMonth =
+tDate.getFullYear()+"-"+String(tDate.getMonth()+1).padStart(2,"0")
 
 if(tMonth !== selectedMonth) return
 
@@ -730,6 +804,8 @@ if(catName==="salary") catName="เงินเดือน"
 
 })
 
+
+
 historyData.forEach(t=>{
 
 const amount = Number(t.amount) || 0
@@ -752,11 +828,11 @@ historyHTML += `
 
 })
 
-const totalBalance = house + car + child
+const totalSaving = house + car + child
 
-const housePercent = totalBalance ? (house/totalBalance)*100 : 0
-const carPercent = totalBalance ? (car/totalBalance)*100 : 0
-const childPercent = totalBalance ? (child/totalBalance)*100 : 0
+const housePercent = totalSaving ? (house/totalSaving)*100 : 0
+const carPercent = totalSaving ? (car/totalSaving)*100 : 0
+const childPercent = totalSaving ? (child/totalSaving)*100 : 0
 
 document.getElementById("balance").innerText=(income-expense).toLocaleString()
 document.getElementById("history").innerHTML=historyHTML
@@ -764,6 +840,16 @@ document.getElementById("history").innerHTML=historyHTML
 drawExpenseChart(expHouse,expCar,expChild)
 /*drawExpenseChart(expHouse,expCar,expChild,expFood,expTravel,expFuel,expOther)*/
 drawSavingChart(house,car,child)
+
+const net = income - expense
+const totalAll = START_BALANCE + net
+
+document.getElementById("sumIncome").innerText = income.toLocaleString()
+document.getElementById("sumExpense").innerText = expense.toLocaleString()
+document.getElementById("sumNet").innerText = net.toLocaleString()
+document.getElementById("sumTotal").innerText = totalAll.toLocaleString()
+
+drawMonthlyChart(income,expense)
 
 
 
