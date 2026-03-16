@@ -291,16 +291,6 @@ color:#666;
 </div>
 <script>
 
-function formatK(num){
-
-if(num >= 1000){
-return (num/1000).toFixed(1)+"K"
-}
-
-return num
-
-}
-
 
 async function loadMyGold(){
 
@@ -329,10 +319,10 @@ const row = `
 <tr>
 <td>${g.name}</td>
 <td>${g.weight}</td>
-<td>${formatK(g.buy)}</td>
-<td>${formatK(Math.round(current))}</td>
+<td>${g.buy.toLocaleString()}</td>
+<td>${Math.round(current).toLocaleString()}</td>
 <td style="color:${profit>=0?'green':'red'}">
-${profit>=0?'+':''}${formatK(Math.round(profit))}
+${profit>=0?'+':''}${Math.round(profit).toLocaleString()}
 </td>
 </tr>
 `
